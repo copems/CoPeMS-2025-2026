@@ -425,7 +425,7 @@
 import { defineComponent } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import projectDetailsService from "@/services/projectDetailsService";
+
 
 export default defineComponent({
   name: "BuildingPermitStep3",
@@ -539,77 +539,77 @@ export default defineComponent({
       this.selectedCategory = null;
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     selectedCategory() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     occupancyClassified() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     numberOfUnits() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     numberOfStorey() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     totalFloorArea() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     lotArea() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     costBuilding() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     costElectrical() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     costMechanical() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     costElectronics() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     costPlumbing() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     costOthers() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     proposedDate() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
     expectedDate() {
       this.validateForm();
       this.saveFormData();
-      this.autoSaveToBackend();
+      this.autoSaveToLocalStorage();
     },
   },
   mounted() {
@@ -627,89 +627,15 @@ export default defineComponent({
     this.saveFormData();
   },
   methods: {
-    async autoSaveToBackend() {
+    autoSaveToLocalStorage() {
       // Clear existing timeout
       if (this.saveTimeout) {
         clearTimeout(this.saveTimeout);
       }
-
       // Debounce: wait 1 second after user stops typing
-      this.saveTimeout = setTimeout(async () => {
-        await this.saveToBackend();
+      this.saveTimeout = setTimeout(() => {
+        this.saveFormData();
       }, 1000);
-    },
-
-    async saveToBackend() {
-      if (this.isSaving) return;
-
-      const userId = this.authStore.currentUser?.id ||
-                     this.authStore.currentUser?.user_id ||
-                     this.authStore.user?.id ||
-                     this.authStore.user?.user_id ||
-                     this.authStore.userId;
-
-      if (!userId) {
-        console.warn('⚠️ No user logged in, cannot save to backend');
-        console.warn('Auth Store:', this.authStore);
-        return;
-      }
-
-      // Don't save if form is empty
-      if (!this.selectedGroup && !this.selectedCategory && !this.numberOfUnits) {
-        console.log('ℹ️ Form is empty, skipping save');
-        return;
-      }
-
-      this.isSaving = true;
-      console.log('💾 Attempting to save to database...');
-
-      try {
-        const projectDetailsData = {
-          occupancy_classified: this.selectedGroup && this.selectedCategory ? `${this.selectedGroup} - ${this.selectedCategory}` : null,
-          total_estimated_cost: parseFloat(this.totalEstimatedCostComputed.replace(/,/g, '')) || 0,
-          number_of_units: parseInt(this.numberOfUnits) || null,
-          number_of_storey: parseInt(this.numberOfStorey) || null,
-          total_floor_area_sqm: parseFloat(this.totalFloorArea.replace(/,/g, '')) || null,
-          lot_area_sqm: parseFloat(this.lotArea.replace(/,/g, '')) || null,
-          building_cost: parseFloat(this.costBuilding.replace(/,/g, '')) || 0,
-          electrical_cost: parseFloat(this.costElectrical.replace(/,/g, '')) || 0,
-          mechanical_cost: parseFloat(this.costMechanical.replace(/,/g, '')) || 0,
-          electronics_cost: parseFloat(this.costElectronics.replace(/,/g, '')) || 0,
-          plumbing_cost: parseFloat(this.costPlumbing.replace(/,/g, '')) || 0,
-          others_cost: parseFloat(this.costOthers.replace(/,/g, '')) || 0,
-          proposed_date_of_construction: this.proposedDate || null,
-          expected_date_of_completion: this.expectedDate || null,
-          application_id: null,
-        };
-
-        let result;
-        if (this.projectDetailsId) {
-          // Update existing record
-          console.log(`📝 Updating existing record ID: ${this.projectDetailsId}`);
-          result = await projectDetailsService.update(this.projectDetailsId, projectDetailsData);
-        } else {
-          // Create new record
-          console.log('✨ Creating new record');
-          result = await projectDetailsService.create(projectDetailsData);
-
-          // Store the ID for future updates
-          if (result.success && result.data?.data?.project_details_id) {
-            this.projectDetailsId = result.data.data.project_details_id;
-            console.log(`✓ Record created with ID: ${this.projectDetailsId}`);
-          }
-        }
-
-        if (result.success) {
-          console.log('✅ Auto-saved to database successfully!');
-        } else {
-          console.error('❌ Failed to save:', result.message);
-        }
-      } catch (error) {
-        console.error('❌ Error auto-saving to backend:', error.message);
-        console.error('Error details:', error);
-      } finally {
-        this.isSaving = false;
-      }
     },
 
     saveFormData() {
@@ -746,7 +672,7 @@ export default defineComponent({
       const storageKey = `bpCharacterFormData_user_${userId}`;
       localStorage.setItem(storageKey, JSON.stringify(formData));
     },
-    async loadSavedData() {
+    loadSavedData() {
       const userId = this.authStore.currentUser?.id ||
                      this.authStore.currentUser?.user_id ||
                      this.authStore.user?.id ||
@@ -759,45 +685,7 @@ export default defineComponent({
         return;
       }
 
-      // Try to load from backend first
-      try {
-        // Use the service to get all project details for the authenticated user
-        const result = await projectDetailsService.getAll();
-
-        if (result.success && result.data?.data && result.data.data.length > 0) {
-          // Get the latest project details (first in array)
-          const backendData = result.data.data[0];
-
-          // Store the project_details_id for updates
-          this.projectDetailsId = backendData.project_details_id;
-
-          // Parse the occupancy_classified to extract group and category
-          if (backendData.occupancy_classified) {
-            const parts = backendData.occupancy_classified.split(' - ');
-            this.selectedGroup = parts[0] || null;
-            this.selectedCategory = parts[1] || null;
-          }
-          this.occupancyClassified = backendData.occupancy_classified || '';
-          this.numberOfUnits = backendData.number_of_units?.toString() || '';
-          this.numberOfStorey = backendData.number_of_storey?.toString() || '';
-          this.totalFloorArea = backendData.total_floor_area_sqm ? this.formatNumberValue(backendData.total_floor_area_sqm) : '';
-          this.lotArea = backendData.lot_area_sqm ? this.formatNumberValue(backendData.lot_area_sqm) : '';
-          this.costBuilding = backendData.building_cost ? this.formatNumberValue(backendData.building_cost) : '';
-          this.costElectrical = backendData.electrical_cost ? this.formatNumberValue(backendData.electrical_cost) : '';
-          this.costMechanical = backendData.mechanical_cost ? this.formatNumberValue(backendData.mechanical_cost) : '';
-          this.costElectronics = backendData.electronics_cost ? this.formatNumberValue(backendData.electronics_cost) : '';
-          this.costPlumbing = backendData.plumbing_cost ? this.formatNumberValue(backendData.plumbing_cost) : '';
-          this.costOthers = backendData.others_cost ? this.formatNumberValue(backendData.others_cost) : '';
-          this.proposedDate = backendData.proposed_date_of_construction || '';
-          this.expectedDate = backendData.expected_date_of_completion || '';
-          console.log('Form data loaded from backend');
-          return;
-        }
-      } catch (error) {
-        console.log('No backend data found, trying localStorage:', error.message);
-      }
-
-      // Fallback to localStorage if backend data not found
+      // Load from localStorage only
       const storageKey = `bpCharacterFormData_user_${userId}`;
       const savedData = localStorage.getItem(storageKey);
       if (savedData) {
@@ -991,6 +879,7 @@ export default defineComponent({
 
 .gradient-text {
   background: linear-gradient(90deg, #1976d2 20%, #1565c0 80%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

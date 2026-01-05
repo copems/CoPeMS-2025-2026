@@ -19,8 +19,9 @@
                 class="mb-4 mt-2 stepper-elevated"
               >
                 <v-stepper-header>
-                  <template v-for="(step, index) in formSteps" :key="index">
+                  <template v-for="(step, index) in formSteps">
                     <v-stepper-item
+                      :key="`step-${step.value}`"
                       :title="step.title"
                       :value="step.value"
                       :complete="formStepValue > step.value"
@@ -31,6 +32,7 @@
                     ></v-stepper-item>
                     <v-divider
                       v-if="index < formSteps.length - 1"
+                      :key="`divider-${step.value}`"
                       :thickness="3"
                       :style="{
                         'border-color':
@@ -299,7 +301,6 @@
 <script>
 import { defineComponent } from "vue";
 import BPNavigation from "./bpnavigation.vue";
-import buildingOwnerService from "@/services/buildingOwnerService.js";
 
 export default defineComponent({
   components: { BPNavigation },
@@ -351,6 +352,7 @@ export default defineComponent({
         this.snackbarMessage = "";
 
         const ownerData = {
+          bldg_owner_id: this.buildingOwnerId || Date.now(),
           last_name: this.lastName,
           first_name: this.firstName,
           middle_initial: this.middleInitial,
@@ -365,46 +367,19 @@ export default defineComponent({
           contact_no: this.contactNo,
         };
 
-        let result;
-        if (this.buildingOwnerId) {
-          // Update existing record
-          result = await buildingOwnerService.update(this.buildingOwnerId, ownerData);
-        } else {
-          // Create new record
-          result = await buildingOwnerService.create(ownerData);
-        }
+        // Save to localStorage only (frontend-only mode)
+        this.buildingOwnerId = ownerData.bldg_owner_id;
+        localStorage.setItem("bldg_owner_id", this.buildingOwnerId);
+        localStorage.setItem("buildingOwnerData", JSON.stringify(ownerData));
 
-        if (result.success) {
-          this.snackbarMessage = this.buildingOwnerId
-            ? "Building owner information updated successfully!"
-            : "Building owner information saved successfully!";
-          this.snackbarColor = "success";
-          this.snackbar = true;
-
-          // Extract the building owner ID from the response
-          if (result.data?.data?.bldg_owner_id) {
-            this.buildingOwnerId = result.data.data.bldg_owner_id;
-          }
-
-          // Store the ID in localStorage for later use
-          localStorage.setItem("bldg_owner_id", this.buildingOwnerId);
-
-          // Store the form data in localStorage as backup
-          localStorage.setItem("buildingOwnerData", JSON.stringify(result.data.data));
-
-          return true;
-        } else {
-          this.snackbarMessage =
-            result.message || "Failed to save building owner information";
-          this.snackbarColor = "error";
-          this.snackbar = true;
-          console.error("Save error:", result.error);
-          return false;
-        }
+        this.snackbarMessage = this.buildingOwnerId
+          ? "Building owner information updated successfully!"
+          : "Building owner information saved successfully!";
+        this.snackbarColor = "success";
+        this.snackbar = true;
+        return true;
       } catch (error) {
-        this.snackbarMessage =
-          error.response?.data?.message ||
-          "An unexpected error occurred. Please try again.";
+        this.snackbarMessage = "An unexpected error occurred. Please try again.";
         this.snackbarColor = "error";
         this.snackbar = true;
         console.error("Error saving building owner:", error);
@@ -433,36 +408,8 @@ export default defineComponent({
     },
 
     async loadExistingData() {
-      const savedId = localStorage.getItem("bldg_owner_id");
-      if (savedId) {
-        try {
-          const result = await buildingOwnerService.getById(savedId);
-          if (result.success && result.data?.data) {
-            const data = result.data.data;
-            this.buildingOwnerId = data.bldg_owner_id;
-            this.lastName = data.last_name;
-            this.firstName = data.first_name;
-            this.middleInitial = data.middle_initial;
-            this.tin = data.tin;
-            this.isOwnedByEnterprise =
-              data.is_enterprise === 1 || data.is_enterprise === true;
-            this.formOfOwnership = data.form_of_ownership;
-            this.province = data.province;
-            this.city = data.city_municipality;
-            this.barangay = data.barangay;
-            this.houseNo = data.house_no;
-            this.street = data.street;
-            this.contactNo = data.contact_no;
-          }
-        } catch (error) {
-          console.error("Error loading building owner data:", error);
-          // Fallback to localStorage if API call fails
-          this.loadLocalStorageData();
-        }
-      } else {
-        // Load from localStorage as fallback
-        this.loadLocalStorageData();
-      }
+      // Only load from localStorage (frontend-only mode)
+      this.loadLocalStorageData();
     },
 
     loadLocalStorageData() {

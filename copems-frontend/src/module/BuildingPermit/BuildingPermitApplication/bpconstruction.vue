@@ -314,7 +314,6 @@
 import { defineComponent } from "vue";
 import { useRouter } from "vue-router";
 import BPNavigation from "./bpnavigation.vue";
-import bpConstructionService from "@/services/bpConstructionService";
 
 export default defineComponent({
   name: "BuildingPermitStep2",
@@ -455,6 +454,7 @@ export default defineComponent({
         this.successMessage = "";
 
         const constructionData = {
+          bp_construction_id: this.constructionId || Date.now(),
           barangay: this.barangay,
           blk_no: this.blkNo,
           street: this.street,
@@ -463,33 +463,13 @@ export default defineComponent({
           scope_of_work: this.selectedScope.join(", "), // Convert array to string
         };
 
-        let result;
-        if (this.constructionId) {
-          // Update existing record
-          result = await bpConstructionService.update(
-            this.constructionId,
-            constructionData
-          );
-        } else {
-          // Create new record
-          result = await bpConstructionService.create(constructionData);
-        }
+        // Save to localStorage only (frontend-only mode)
+        this.constructionId = constructionData.bp_construction_id;
+        localStorage.setItem("bp_construction_id", this.constructionId);
+        localStorage.setItem("bp_construction_data", JSON.stringify(constructionData));
 
-        if (result.success) {
-          this.successMessage = "Construction data saved successfully!";
-          if (result.data?.data?.bp_construction_id) {
-            this.constructionId = result.data.data.bp_construction_id;
-          }
-
-          // Store the construction ID in localStorage for later use
-          localStorage.setItem("bp_construction_id", this.constructionId);
-
-          return true;
-        } else {
-          this.errorMessage = result.message || "Failed to save construction data";
-          console.error("Error saving construction data:", result.error);
-          return false;
-        }
+        this.successMessage = "Construction data saved successfully!";
+        return true;
       } catch (error) {
         this.errorMessage = "An unexpected error occurred";
         console.error("Error in saveConstructionData:", error);
@@ -527,20 +507,18 @@ export default defineComponent({
     },
 
     async loadConstructionData() {
-      const savedId = localStorage.getItem("bp_construction_id");
-      if (savedId) {
+      // Only load from localStorage (frontend-only mode)
+      const savedData = localStorage.getItem("bp_construction_data");
+      if (savedData) {
         try {
-          const result = await bpConstructionService.getById(savedId);
-          if (result.success && result.data?.data) {
-            const data = result.data.data;
-            this.constructionId = data.bp_construction_id;
-            this.barangay = data.barangay;
-            this.blkNo = data.blk_no;
-            this.street = data.street;
-            this.tctNo = data.tct_no;
-            this.taxDecNo = data.current_tax_dec_no;
-            this.selectedScope = data.scope_of_work ? data.scope_of_work.split(", ") : [];
-          }
+          const data = JSON.parse(savedData);
+          this.constructionId = data.bp_construction_id;
+          this.barangay = data.barangay;
+          this.blkNo = data.blk_no;
+          this.street = data.street;
+          this.tctNo = data.tct_no;
+          this.taxDecNo = data.current_tax_dec_no;
+          this.selectedScope = data.scope_of_work ? data.scope_of_work.split(", ") : [];
         } catch (error) {
           console.error("Error loading construction data:", error);
         }
