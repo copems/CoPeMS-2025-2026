@@ -1,0 +1,49 @@
+import { createRouter, createWebHistory } from "vue-router";
+
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
+  routes: [
+    {
+      path: "/",
+      component: () => import("@/layouts/MainLayout.vue"),
+      children: [
+        {
+          path: "",
+          name: "Applicant-Homepage",
+          component: () => import("@/pages/Applicant-Homepage.vue"),
+        },
+        {
+          path: "Applicant-Login",
+          name: "Applicant-Login",
+          component: () => import("@/pages/Applicant-Login.vue"),
+        },
+        {
+          path: "Applicant-Registration",
+          name: "Applicant-Registration",
+          component: () => import("@/pages/Applicant-Registration.vue"),
+        },
+        {
+          path: "register",
+          name: "register",
+          component: () => import("@/pages/Applicant-Registration.vue"),
+        },
+        {
+          path: "Applicant-bpInquiry",
+          name: "Applicant-bpInquiry",
+          component: () => import("@/pages/Applicant-bpInquiry.vue"),
+        },
+        {
+          path: "Applicant-opInquiry",
+          name: "Applicant-opInquiry",
+          component: () => import("@/pages/Applicant-opInquiry.vue"),
+        },
+        {
+          path: "Applicant-ForgotPW",
+          name: "Applicant-ForgotPW",
+          component: () => import("@/pages/Applicant-ForgotPW.vue"),
+        },
+      ],
+    },
+  ],
+});
+export default router;
