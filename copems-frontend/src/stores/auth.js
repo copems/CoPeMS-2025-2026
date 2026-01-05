@@ -36,7 +36,9 @@ export const useAuthStore = defineStore("auth", {
           const draftStore = useDraftStore();
           await draftStore.loadDrafts?.();
         } else {
-          throw new Error("Login failed: Invalid credentials (frontend-only mode)");
+          throw new Error(
+            "Login failed: Invalid credentials (frontend-only mode)"
+          );
         }
       } catch (error) {
         this.user = null;
@@ -63,7 +65,10 @@ export const useAuthStore = defineStore("auth", {
         if (email && password) {
           localStorage.setItem("accessToken", "demo-access-token");
           localStorage.setItem("refreshToken", "demo-refresh-token");
-          localStorage.setItem("user", JSON.stringify({ email: email, name: "Demo User" }));
+          localStorage.setItem(
+            "user",
+            JSON.stringify({ email: email, name: "Demo User" })
+          );
           // Simulate auto-login
           await this.login(email, password);
           return {
@@ -71,7 +76,9 @@ export const useAuthStore = defineStore("auth", {
             message: "Registration and login successful! (frontend-only mode)",
           };
         } else {
-          throw new Error("Registration failed: Missing fields (frontend-only mode)");
+          throw new Error(
+            "Registration failed: Missing fields (frontend-only mode)"
+          );
         }
       } catch (error) {
         console.error("Registration error:", error);
