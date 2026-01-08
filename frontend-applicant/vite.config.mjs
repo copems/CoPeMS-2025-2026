@@ -4,8 +4,8 @@ import Components from 'unplugin-vue-components/vite'
 import Fonts from 'unplugin-fonts/vite'
 import Layouts from 'vite-plugin-vue-layouts-next'
 import Vue from '@vitejs/plugin-vue'
-import VueRouter from 'unplugin-vue-router/vite'
-import { VueRouterAutoImports } from 'unplugin-vue-router'
+// import VueRouter from 'unplugin-vue-router/vite'
+// import { VueRouterAutoImports } from 'unplugin-vue-router'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 // Utilities
@@ -15,7 +15,7 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    VueRouter(),
+    // VueRouter(), // Commented out - using manual router configuration
     Layouts(),
     Vue({
       template: { transformAssetUrls },
@@ -39,7 +39,7 @@ export default defineConfig({
     AutoImport({
       imports: [
         'vue',
-        VueRouterAutoImports,
+        'vue-router',
         {
           pinia: ['defineStore', 'storeToRefs'],
         },
@@ -51,13 +51,7 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    exclude: [
-      'vuetify',
-      'vue-router',
-      'unplugin-vue-router/runtime',
-      'unplugin-vue-router/data-loaders',
-      'unplugin-vue-router/data-loaders/basic',
-    ],
+    exclude: ['vuetify'],
   },
   define: { 'process.env': {} },
   resolve: {
@@ -76,5 +70,25 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        }
+      },
+    },
   },
 })
