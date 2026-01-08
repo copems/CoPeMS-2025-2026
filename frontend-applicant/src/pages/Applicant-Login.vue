@@ -1,9 +1,11 @@
 <template>
   <div class="page-wrapper">
     <v-main>
-      <v-container class="fill-height pa-8" fluid>
+      <v-container
+        class="fill-height pa-8 d-flex align-center justify-center"
+        fluid
+      >
         <v-row align="center" justify="center" class="w-100">
-          <!-- INFO SECTION -->
           <v-col cols="12" md="7" class="pa-6">
             <div class="info-section elevation-2">
               <h2 class="info-title gradient-info-title">
@@ -16,9 +18,9 @@
                   </div>
                   <h3 class="feature-title">Time-Saving</h3>
                   <p class="feature-description">
-                    Save valuable time by processing your permits online. No more waiting
-                    in long queues – complete everything from the comfort of your home or
-                    office.
+                    Save valuable time by processing your permits online. No
+                    more waiting in long queues – complete everything from the
+                    comfort of your home or office.
                   </p>
                 </v-col>
                 <v-col cols="12" sm="4" class="text-center">
@@ -27,8 +29,9 @@
                   </div>
                   <h3 class="feature-title">24/7 Access</h3>
                   <p class="feature-description">
-                    Access our services around the clock, every day of the year. Submit
-                    applications and track progress at any time that suits your schedule.
+                    Access our services around the clock, every day of the year.
+                    Submit applications and track progress at any time that
+                    suits your schedule.
                   </p>
                 </v-col>
                 <v-col cols="12" sm="4" class="text-center">
@@ -37,15 +40,15 @@
                   </div>
                   <h3 class="feature-title">Real-time Updates</h3>
                   <p class="feature-description">
-                    Stay informed with instant notifications about your application
-                    status. Receive timely updates and never miss important information.
+                    Stay informed with instant notifications about your
+                    application status. Receive timely updates and never miss
+                    important information.
                   </p>
                 </v-col>
               </v-row>
             </div>
           </v-col>
 
-          <!-- LOGIN CARD -->
           <v-col cols="12" md="4" class="pa-6">
             <v-card class="login-card pa-7 elevation-8">
               <v-card-title
@@ -59,7 +62,7 @@
               <v-card-text>
                 <v-form @submit.prevent="handleLogin" ref="loginForm">
                   <v-text-field
-                    v-model="email"
+                    v-model="username"
                     label="Email Address"
                     density="comfortable"
                     variant="outlined"
@@ -77,14 +80,18 @@
                     density="comfortable"
                     variant="outlined"
                     prepend-inner-icon="mdi-lock-outline"
-                    :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    :append-inner-icon="
+                      showPassword ? 'mdi-eye' : 'mdi-eye-off'
+                    "
                     @click:append-inner="toggleShowPassword"
                     class="mb-2"
                     :rules="passwordRules"
                     required
                   />
 
-                  <div class="d-flex justify-space-between align-center mt-2 mb-4">
+                  <div
+                    class="d-flex justify-space-between align-center mt-2 mb-4"
+                  >
                     <v-checkbox-btn
                       label="Remember me"
                       class="ma-0 pa-0"
@@ -97,13 +104,15 @@
                     >
                   </div>
 
-                  <!-- Error/Success Messages -->
                   <v-alert
                     v-if="alertMessage"
                     :type="alertType"
                     class="mb-4"
+                    variant="tonal"
                     :icon="
-                      alertType === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle'
+                      alertType === 'success'
+                        ? 'mdi-check-circle'
+                        : 'mdi-alert-circle'
                     "
                   >
                     {{ alertMessage }}
@@ -118,12 +127,16 @@
                     :loading="loading"
                     :disabled="loading"
                   >
-                    {{ loading ? "Signing in..." : "Login" }}
+                    {{ loading ? "Verifying..." : "Login" }}
                   </v-btn>
 
                   <div class="text-center mt-6">
-                    <span class="text-grey-darken-1">Don't have an account?</span>
-                    <router-link to="/register" class="text-primary font-weight-bold ms-1"
+                    <span class="text-grey-darken-1"
+                      >Don't have an account?</span
+                    >
+                    <router-link
+                      to="/register"
+                      class="text-primary font-weight-bold ms-1"
                       >Register</router-link
                     >
                   </div>
@@ -138,11 +151,14 @@
 </template>
 
 <script>
+import api from "@/services/api";
+
 export default {
-  name: "LoginPage",
+  name: "HomePage",
   data() {
     return {
-      email: "",
+      userAccount: null,
+      username: "",
       password: "",
       showPassword: false,
       loading: false,
@@ -159,27 +175,77 @@ export default {
     toggleShowPassword() {
       this.showPassword = !this.showPassword;
     },
-    async handleLogin() {
-      // Validate form
-      const { valid } = await this.$refs.loginForm.validate();
-      if (!valid) {
-        return;
+    async fetchUserAccount() {
+      try {
+        console.log("Fetching user account for:", this.username);
+        console.log("API endpoint:", `/api/userAccount/${this.username}`);
+
+        const response = await api.get(`/api/userAccount/${this.username}`);
+
+        console.log("Response status:", response.status);
+        console.log("Response data:", response.data);
+        console.log("Response type:", typeof response.data);
+
+        this.userAccount = response.data;
+
+        return !!this.userAccount;
+      } catch (error) {
+        console.error("Error fetching user account:", error);
+        console.error("Error response:", error.response);
+        this.userAccount = null;
+        return false;
       }
+    },
+    async handleLogin() {
+      // 1. Validate form fields first
+      const { valid } = await this.$refs.loginForm.validate();
+      if (!valid) return;
 
       this.loading = true;
       this.alertMessage = "";
 
-      // Simulate login process
-      setTimeout(() => {
-        this.alertType = "success";
-        this.alertMessage = "Login successful!";
-        this.loading = false;
+      try {
+        // 2. Fetch user account data
+        const success = await this.fetchUserAccount();
 
-        // Redirect after showing success message
-        setTimeout(() => {
-          this.$router.push("/");
-        }, 1000);
-      }, 800);
+        if (!success || !this.userAccount) {
+          this.loading = false;
+          this.alertType = "error";
+          this.alertMessage =
+            "User account not found. Please check your username.";
+          return;
+        }
+
+        // Handle both array and object responses
+        const account = Array.isArray(this.userAccount)
+          ? this.userAccount[0]
+          : this.userAccount;
+
+        // 3. Check credentials
+        if (
+          this.username === account.username &&
+          this.password === account.user_password
+        ) {
+          // SUCCESS CASE
+          this.alertType = "success";
+          this.alertMessage = "Login successful! Redirecting...";
+
+          setTimeout(() => {
+            this.loading = false;
+            this.$router.push("/");
+          }, 1500);
+        } else {
+          // FAILURE CASE
+          this.loading = false;
+          this.alertType = "error";
+          this.alertMessage = "Invalid username or password. Please try again.";
+        }
+      } catch (error) {
+        this.loading = false;
+        this.alertType = "error";
+        this.alertMessage = "An error occurred during login. Please try again.";
+        console.error("Login error:", error);
+      }
     },
   },
 };
@@ -214,7 +280,6 @@ export default {
 }
 .gradient-info-title {
   background: linear-gradient(90deg, #1976d2 20%, #4a148c 90%);
-  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -252,7 +317,6 @@ export default {
   margin-bottom: 0;
 }
 
-/* Login Card */
 .login-card {
   border-radius: 22px !important;
   box-shadow: 0 8px 40px rgba(33, 150, 243, 0.12) !important;
