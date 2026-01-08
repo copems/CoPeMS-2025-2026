@@ -90,6 +90,37 @@ const router = createRouter({
           name: "bpadetails",
           component: () => import("@/module/BP/BPADetails.vue"),
         },
+                 // Occupancy Permit Applicant Routes
+        {
+          path: "FormsSection",
+          name: "FormsSection",
+          component: () => import("@/module/OP/FormsSection.vue"),
+        },
+        {
+          path: "OPapply",
+          name: "OPapply",
+          component: () => import("@/module/OP/OPapply.vue"),
+        },
+        {
+          path: "OPlocation",
+          name: "OPlocation",
+          component: () => import("@/module/OP/OPlocation.vue"),
+        },
+        {
+          path: "OPowner",
+          name: "OPowner",
+          component: () => import("@/module/OP/OPowner.vue"),
+        },
+        {
+          path: "OPsignatories",
+          name: "OPsignatories",
+          component: () => import("@/module/OP/OPsignatories.vue"),
+        },
+        {
+          path: "OPtype",
+          name: "OPtype",
+          component: () => import("@/module/OP/OPtype.vue"),
+        },
       ],
     },
   ],
