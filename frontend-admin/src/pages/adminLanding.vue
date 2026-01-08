@@ -3,9 +3,15 @@
     <transition name="fade">
       <div class="loader-wrapper" v-if="isLoading">
         <div class="loader-content">
-          <img src="@/assets/copemslogo.png" alt="CoPeMS Logo" class="loader-logo" />
+          <img
+            src="@/assets/copemslogo.png"
+            alt="CoPeMS Logo"
+            class="loader-logo"
+          />
           <div class="branding-text">
-            <span class="main-title text-fade-in-subtle">Construction Permit</span>
+            <span class="main-title text-fade-in-subtle"
+              >Construction Permit</span
+            >
             <span class="sub-title text-fade-in-subtle">Management System</span>
           </div>
         </div>
@@ -58,14 +64,18 @@
                     density="comfortable"
                     variant="outlined"
                     prepend-inner-icon="mdi-lock-outline"
-                    :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    :append-inner-icon="
+                      showPassword ? 'mdi-eye' : 'mdi-eye-off'
+                    "
                     @click:append-inner="toggleShowPassword"
                     class="mb-2"
                     :rules="passwordRules"
                     required
                   />
 
-                  <div class="d-flex justify-space-between align-center mt-2 mb-4">
+                  <div
+                    class="d-flex justify-space-between align-center mt-2 mb-4"
+                  >
                     <v-checkbox-btn
                       label="Remember me"
                       class="ma-0 pa-0"
@@ -83,7 +93,9 @@
                     :type="alertType"
                     class="mb-4"
                     :icon="
-                      alertType === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle'
+                      alertType === 'success'
+                        ? 'mdi-check-circle'
+                        : 'mdi-alert-circle'
                     "
                   >
                     {{ alertMessage }}
@@ -117,7 +129,6 @@
 </template>
 
 <script>
-import { useAuthStore } from "@/stores/auth";
 import nagaImage from "@/assets/naga.png";
 
 export default {

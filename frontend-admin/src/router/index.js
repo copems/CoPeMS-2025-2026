@@ -15,9 +15,28 @@ const router = createRouter({
           component: () => import("@/pages/adminLanding.vue"),
         },
         {
-          path: "testing",
-          name: "testing",
-          component: () => import("@/pages/testing.vue"),
+          path: "ComplianceMonitoring",
+          name: "ComplianceMonitoring",
+          component: () =>
+            import("@/Modules/ComplianceMonitoring/Compliance/compliance.vue"), // Or any other component for the root
+        },
+
+        {
+          path: "rqmonitoring",
+          name: "rqmonitoring",
+          component: () =>
+            import(
+              "@/Modules/ComplianceMonitoring/RQMonitoring/rqmonitoring.vue"
+            ), // Or any other component for the root
+        },
+
+        {
+          path: "applicantinfo",
+          name: "applicantinfo",
+          component: () =>
+            import(
+              "@/Modules/ComplianceMonitoring/ApplicantInfo/applicantinfo.vue"
+            ), // Or any other component for the root
         },
       ],
     },
