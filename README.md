@@ -7,5 +7,5 @@ Construction Permit Management System
 
 ## Run Project
 
-    Copems-backend / npm start
-    Copems-frontend / npm run dev
+    backend / npx nodemon index.js
+    frontend-applicant / npm run dev
